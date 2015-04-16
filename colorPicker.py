@@ -6,7 +6,7 @@ import pythoncom
 import win32api
 import win32con
 import win32gui
-import pyHook
+#import pyHook
 from Tkinter import *
 import win32clipboard as board
 
@@ -34,20 +34,23 @@ def setClipBoardText(aString):
     board.CloseClipboard()
 
 def onKeyboardEvent(event):   
-    "处理键盘事件"     
+    "handle keyboard events"
+    global button_trigger   
     #print('-' * 20 + 'Keyboard Begin' + '-' * 20 + '\n')  
     #print("Current Time:%s\n" % time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime()))  
-    print("MessageName:%s\n" % str(event.MessageName))  
+    #print("MessageName:%s\n" % str(event.MessageName))  
     #print("Message:%d\n" % event.Message)  
     #print("Time:%d\n" % event.Time)  
-    print("Window:%s\n" % str(event.Window))
+    #print("Window:%s\n" % str(event.Window))
     #print("WindowName:%s\n" % str(event.WindowName))  
     #print("Ascii_code: %d\n" % event.Ascii)  
     #print("Ascii_char:%s\n" % chr(event.Ascii))  
-    print("Key:%s\n" % str(event.Key)) 
-    if str(event.Key) == "Escape":
-        global text_r
-        text_r.set("!!!")
+    
+    if button_trigger == -1:
+        return True
+
+    if event.char == chr(27):
+        print("Key:%s\n" % str(event.char)) 
         pos_x , pos_y = getPos()
 
         hwnd = win32gui.GetDesktopWindow()
@@ -60,11 +63,25 @@ def onKeyboardEvent(event):
         v_Green = (color & 0xff00) / 256;
         v_Blue = (color & 0xff0000) / 65536;
 
+        text_r.set(v_Red)
+        text_g.set(v_Green)
+        text_b.set(v_Blue)
+
         RGB = (hex(v_Red)[2:4] + hex(v_Green)[2:4] + hex(v_Blue)[2:4]).upper()
 
         print RGB
         setClipBoardText(RGB)
+
     return True
+
+def changeState():
+    global button_trigger
+    if button_trigger == -1:
+        button_text.set("STOP")
+        button_trigger *= -1 
+    else:
+        button_text.set("START")
+        button_trigger *= -1
 
 dll = WinDLL('user32.dll'); 
 
@@ -74,16 +91,20 @@ frame.pack()
 
 button_quit = Button(frame, text="QUIT", fg="red", command=frame.quit, width=6,height=1)
 button_quit.place(x = 210, y = 150)
-button_usage = Button(frame, text="USAGE", width=6,height=1)
+
+button_trigger = -1
+button_text = StringVar()
+button_usage = Button(frame, textvariable=button_text, command=changeState, width=6,height=1)
 button_usage.place(x = 40, y = 150)
+button_text.set("START")
 
 text_r = StringVar()
 text_g = StringVar()
 text_b = StringVar()
 
-entry_r = Entry(frame, width=30, textvariable= text_r)
-entry_g = Entry(frame, width=30, textvariable= text_g)
-entry_b = Entry(frame, width=30, textvariable= text_b)
+entry_r = Entry(frame, width=30, textvariable= text_r, state="readonly")
+entry_g = Entry(frame, width=30, textvariable= text_g, state="readonly")
+entry_b = Entry(frame, width=30, textvariable= text_b, state="readonly")
 
 text_r.set("R")
 text_g.set("G")
@@ -93,21 +114,25 @@ entry_r.place(x = 40, y = 20)
 entry_g.place(x = 40, y = 55)
 entry_b.place(x = 40, y = 90)
 
-hm = pyHook.HookManager()
+#hm = pyHook.HookManager()
 
 #keyboard
-hm.KeyDown = onKeyboardEvent
-hm.HookKeyboard()
+#hm.KeyDown = onKeyboardEvent
+#hm.HookKeyboard()
 
-#监控鼠标
 #hm.MouseAll = onMouseEvent  
 #hm.HookMouse()  
 
 #pythoncom.PumpMessages()
 
+'''
 while 1:
     root.after(100,root.quit)
     root.mainloop()
     #pythoncom.PumpMessages()
+'''
 
-#root.mainloop()
+#"Key" not "key" 'K' is upper
+root.bind("<Key>", onKeyboardEvent)
+
+root.mainloop()
