@@ -86,8 +86,24 @@ def changeState():
 dll = WinDLL('user32.dll'); 
 
 root = Tk()
+root.resizable(False, False)
+
 frame = Frame(root, width=300, height=200, bg='green')
 frame.pack()
+
+def showUsage():
+   usageWindow = Toplevel(root)
+   label = Label(usageWindow, text="test")
+   label.pack()
+
+menuList = Menu(root)
+fileMenu = Menu(menuList, tearoff=0)
+fileMenu.add_command(label="Usage", command=showUsage)
+fileMenu.add_command(label="About", command=showUsage)
+menuList.add_cascade(label="Help", menu=fileMenu)
+
+
+root.config(menu=menuList)
 
 button_quit = Button(frame, text="QUIT", fg="red", command=frame.quit, width=6,height=1)
 button_quit.place(x = 210, y = 150)
@@ -102,17 +118,25 @@ text_r = StringVar()
 text_g = StringVar()
 text_b = StringVar()
 
-entry_r = Entry(frame, width=30, textvariable= text_r, state="readonly")
-entry_g = Entry(frame, width=30, textvariable= text_g, state="readonly")
-entry_b = Entry(frame, width=30, textvariable= text_b, state="readonly")
-
 text_r.set("R")
 text_g.set("G")
 text_b.set("B")
 
-entry_r.place(x = 40, y = 20)
-entry_g.place(x = 40, y = 55)
-entry_b.place(x = 40, y = 90)
+entry_r = Entry(frame, width=28, textvariable= text_r, state="readonly")
+entry_g = Entry(frame, width=28, textvariable= text_g, state="readonly")
+entry_b = Entry(frame, width=28, textvariable= text_b, state="readonly")
+
+label_r = Label(frame, text="R")
+label_g = Label(frame, text="G")
+label_b = Label(frame, text="B")
+
+label_r.place(x = 40, y = 20)
+label_g.place(x = 40, y = 55)
+label_b.place(x = 40, y = 90)
+
+entry_r.place(x = 60, y = 20)
+entry_g.place(x = 60, y = 55)
+entry_b.place(x = 60, y = 90)
 
 #hm = pyHook.HookManager()
 
