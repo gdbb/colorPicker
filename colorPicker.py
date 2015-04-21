@@ -49,8 +49,8 @@ def onKeyboardEvent(event):
     if button_trigger == -1:
         return True
 
-    if event.char == chr(27):
-        print("Key:%s\n" % str(event.char)) 
+    if event.char == chr(32):
+        #print("Key:%s\n" % str(event.char)) 
         pos_x , pos_y = getPos()
 
         hwnd = win32gui.GetDesktopWindow()
@@ -58,7 +58,7 @@ def onKeyboardEvent(event):
         dc = win32gui.GetWindowDC(hwnd)
         #print dc
         color = win32gui.GetPixel(dc, pos_x, pos_y)
-        print color
+        #print color
         v_Red = color & 0xff;
         v_Green = (color & 0xff00) / 256;
         v_Blue = (color & 0xff0000) / 65536;
@@ -69,7 +69,8 @@ def onKeyboardEvent(event):
 
         RGB = (hex(v_Red)[2:4] + hex(v_Green)[2:4] + hex(v_Blue)[2:4]).upper()
 
-        print RGB
+        #print RGB
+        text_total.set(RGB)
         setClipBoardText(RGB)
 
     return True
@@ -87,48 +88,63 @@ dll = WinDLL('user32.dll');
 
 root = Tk()
 root.resizable(False, False)
+root.title("colorPicker")
 
-frame = Frame(root, width=300, height=200, bg='green')
+frame = Frame(root, width=300, height=220, bg='green')
 frame.pack()
 
 def showUsage():
-   usageWindow = Toplevel(root)
-   label = Label(usageWindow, text="test")
-   label.pack()
+    usageText = "    After clicking the \"START\" button you can press the \"Esc\" key to get RGB value of the point where your cursor is at and the RGB value will be in your clipboard."
+    usageWindow = Toplevel(root)
+    usageWindow.geometry("300x200")
+    label = Label(usageWindow, text=usageText, font=("Helvetica", 16), wraplength=280, justify="left", anchor="center")
+    label.pack()
+
+def showAbout():
+    aboutText = "David.\ngdbb.68@163.com"
+    aboutWindow = Toplevel(root)
+    aboutWindow.geometry("300x50")
+    label = Label(aboutWindow, text=aboutText, font=("Helvetica", 16), wraplength=280, justify="left", anchor="center")
+    label.pack()
 
 menuList = Menu(root)
 fileMenu = Menu(menuList, tearoff=0)
 fileMenu.add_command(label="Usage", command=showUsage)
-fileMenu.add_command(label="About", command=showUsage)
+fileMenu.add_command(label="About", command=showAbout)
 menuList.add_cascade(label="Help", menu=fileMenu)
 
 
 root.config(menu=menuList)
 
 button_quit = Button(frame, text="QUIT", fg="red", command=frame.quit, width=6,height=1)
-button_quit.place(x = 210, y = 150)
+button_quit.place(x = 210, y = 170)
 
 button_trigger = -1
 button_text = StringVar()
-button_usage = Button(frame, textvariable=button_text, command=changeState, width=6,height=1)
-button_usage.place(x = 40, y = 150)
+button_state = Button(frame, textvariable=button_text, command=changeState, width=6,height=1)
+button_state.place(x = 40, y = 170)
 button_text.set("START")
 
 text_r = StringVar()
 text_g = StringVar()
 text_b = StringVar()
+text_total = StringVar()
 
 text_r.set("R")
 text_g.set("G")
 text_b.set("B")
+text_total.set("RGB")
 
 entry_r = Entry(frame, width=28, textvariable= text_r, state="readonly")
 entry_g = Entry(frame, width=28, textvariable= text_g, state="readonly")
 entry_b = Entry(frame, width=28, textvariable= text_b, state="readonly")
+entry_total = Entry(frame, width=28, textvariable= text_total, state="readonly")
+
 
 label_r = Label(frame, text="R")
 label_g = Label(frame, text="G")
 label_b = Label(frame, text="B")
+
 
 label_r.place(x = 40, y = 20)
 label_g.place(x = 40, y = 55)
@@ -137,6 +153,7 @@ label_b.place(x = 40, y = 90)
 entry_r.place(x = 60, y = 20)
 entry_g.place(x = 60, y = 55)
 entry_b.place(x = 60, y = 90)
+entry_total.place(x = 60, y = 125)
 
 #hm = pyHook.HookManager()
 
