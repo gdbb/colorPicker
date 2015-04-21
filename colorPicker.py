@@ -1,75 +1,36 @@
 # -*- coding: utf-8 -*-
 
-from ctypes import * 
 import time
-import pythoncom  
-import win32api
-import win32con
-import win32gui
-#import pyHook
+import pythoncom
+import pyperclip
 from Tkinter import *
-import win32clipboard as board
+from PIL import Image,ImageGrab
 
-class POINT(Structure):  
-    _fields_ = [  
-            ("x", c_ulong),  
-            ("y", c_ulong)  
-            ]
-  
-def getPos():  
-    point = POINT()  
-    dll.GetCursorPos(byref(point))  
-    return point.x, point.y
-
-def getClipBoardText():  
-    board.OpenClipboard()  
-    d = board.GetClipboardData(win32con.CF_TEXT)  
-    board.CloseClipboard()  
-    return d
-
-def setClipBoardText(aString):  
-    board.OpenClipboard()  
-    board.EmptyClipboard()  
-    board.SetClipboardData(win32con.CF_TEXT, aString)  
-    board.CloseClipboard()
+def setClipBoardText(text):
+    pyperclip.copy(text)
 
 def onKeyboardEvent(event):   
     "handle keyboard events"
-    global button_trigger   
-    #print('-' * 20 + 'Keyboard Begin' + '-' * 20 + '\n')  
-    #print("Current Time:%s\n" % time.strftime("%a, %d %b %Y %H:%M:%S", time.gmtime()))  
-    #print("MessageName:%s\n" % str(event.MessageName))  
-    #print("Message:%d\n" % event.Message)  
-    #print("Time:%d\n" % event.Time)  
-    #print("Window:%s\n" % str(event.Window))
-    #print("WindowName:%s\n" % str(event.WindowName))  
-    #print("Ascii_code: %d\n" % event.Ascii)  
-    #print("Ascii_char:%s\n" % chr(event.Ascii))  
+    global button_trigger
     
     if button_trigger == -1:
         return True
 
     if event.char == chr(32):
-        #print("Key:%s\n" % str(event.char)) 
-        pos_x , pos_y = getPos()
+        screen = ImageGrab.grab()
+        pos_x = pos_y = 1
+        color = screen.getpixel((event.x_root, event.y_root))
 
-        hwnd = win32gui.GetDesktopWindow()
-        #print hwnd
-        dc = win32gui.GetWindowDC(hwnd)
-        #print dc
-        color = win32gui.GetPixel(dc, pos_x, pos_y)
-        #print color
-        v_Red = color & 0xff;
-        v_Green = (color & 0xff00) / 256;
-        v_Blue = (color & 0xff0000) / 65536;
+        v_Red = color[0];
+        v_Green = color[1];
+        v_Blue = color[2];
 
         text_r.set(v_Red)
         text_g.set(v_Green)
         text_b.set(v_Blue)
 
         RGB = (hex(v_Red)[2:4] + hex(v_Green)[2:4] + hex(v_Blue)[2:4]).upper()
-
-        #print RGB
+        RGB = "%02X"%v_Red + "%02X"%v_Green + "%02X"%v_Blue
         text_total.set(RGB)
         setClipBoardText(RGB)
 
@@ -84,14 +45,6 @@ def changeState():
         button_text.set("START")
         button_trigger *= -1
 
-dll = WinDLL('user32.dll'); 
-
-root = Tk()
-root.resizable(False, False)
-root.title("colorPicker")
-
-frame = Frame(root, width=300, height=220, bg='green')
-frame.pack()
 
 def showUsage():
     usageText = "    After clicking the \"START\" button you can press the \"Esc\" key to get RGB value of the point where your cursor is at and the RGB value will be in your clipboard."
@@ -106,6 +59,13 @@ def showAbout():
     aboutWindow.geometry("300x50")
     label = Label(aboutWindow, text=aboutText, font=("Helvetica", 16), wraplength=280, justify="left", anchor="center")
     label.pack()
+
+root = Tk()
+root.resizable(False, False)
+root.title("colorPicker")
+
+frame = Frame(root, width=300, height=220, bg='green')
+frame.pack()
 
 menuList = Menu(root)
 fileMenu = Menu(menuList, tearoff=0)
@@ -155,25 +115,6 @@ entry_g.place(x = 60, y = 55)
 entry_b.place(x = 60, y = 90)
 entry_total.place(x = 60, y = 125)
 
-#hm = pyHook.HookManager()
-
-#keyboard
-#hm.KeyDown = onKeyboardEvent
-#hm.HookKeyboard()
-
-#hm.MouseAll = onMouseEvent  
-#hm.HookMouse()  
-
-#pythoncom.PumpMessages()
-
-'''
-while 1:
-    root.after(100,root.quit)
-    root.mainloop()
-    #pythoncom.PumpMessages()
-'''
-
-#"Key" not "key" 'K' is upper
 root.bind("<Key>", onKeyboardEvent)
 
 root.mainloop()
