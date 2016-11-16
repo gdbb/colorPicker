@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-import pythoncom
+#import pythoncom
 import pyperclip
 from Tkinter import *
 from PIL import Image,ImageGrab
