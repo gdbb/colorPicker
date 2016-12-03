@@ -1,25 +1,59 @@
 # -*- coding: utf-8 -*-
 
+import gtk.gdk
 import time
 #import pythoncom
 import pyperclip
 from Tkinter import *
-from PIL import Image,ImageGrab
+#from PIL import Image,ImageGrab
 
 def setClipBoardText(text):
     pyperclip.copy(text)
 
-def onKeyboardEvent(event):   
+def onKeyboardEvent(event):
     "handle keyboard events"
     global button_trigger
     
     if button_trigger == -1:
         return True
 
-    if event.char == chr(32):
-        screen = ImageGrab.grab()
+    if event.char == chr(32) or True:
+        
+        default = gtk.gdk.display_get_default()
+        window = default.get_default_screen().get_root_window()
+
+        weight, height = window.get_size()
+        buf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB,False, 8, weight, height)
+        buf = buf.get_from_drawable(window, window.get_colormap(), 0, 0, 0, 0, weight, height)
+        
+        #print event.x, event.y
+        #print event.x_root, event.y_root
+        x = root.winfo_pointerx()# - root.winfo_rootx()
+        y = root.winfo_pointery()# - root.winfo_rooty()
+        
+        color = buf.get_pixels_array()[y][x]
+        print x, y
+        print color
+
+        v_Red = color[0];
+        v_Green = color[1];
+        v_Blue = color[2];
+
+        text_r.set(v_Red)
+        text_g.set(v_Green)
+        text_b.set(v_Blue)
+
+        RGB = (hex(v_Red)[2:4] + hex(v_Green)[2:4] + hex(v_Blue)[2:4]).upper()
+        RGB = "%02X"%v_Red + "%02X"%v_Green + "%02X"%v_Blue
+        text_total.set(RGB)
+        #setClipBoardText(RGB)
+
+        #buf.save("screen.png", "png")
+
+        '''
+        #screen = ImageGrab.grab()
         pos_x = pos_y = 1
-        color = screen.getpixel((event.x_root, event.y_root))
+        color = screen.getpixel((x, y))
 
         v_Red = color[0];
         v_Green = color[1];
@@ -33,7 +67,7 @@ def onKeyboardEvent(event):
         RGB = "%02X"%v_Red + "%02X"%v_Green + "%02X"%v_Blue
         text_total.set(RGB)
         setClipBoardText(RGB)
-
+        '''
     return True
 
 def changeState():
@@ -42,7 +76,7 @@ def changeState():
         button_text.set("STOP")
         button_trigger *= -1 
     else:
-        button_text.set("START")
+        button_text.set("START") 
         button_trigger *= -1
 
 
